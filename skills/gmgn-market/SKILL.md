@@ -44,10 +44,22 @@ Use the `gmgn-cli` tool to query K-line data for a token or browse trending toke
 | `--chain` | Required. `sol` / `bsc` / `base` |
 | `--interval` | Required. `1h` / `3h` / `6h` / `24h` |
 | `--limit <n>` | Number of results (default 100, max 100) |
-| `--order-by <field>` | Sort field: `default` / `swaps` / `marketcap` / `history_highest_market_cap` / `liquidity` / `volume` / `holder_count` / `smart_degen_count` / `renowned_count` / `gas_fee` / `price` / `change1m` / `change5m` / `change1h` / `creation_timestamp` |
+| `--order-by <field>` | Sort field: `default` / `swaps` / `marketcap` / `history_highest_market_cap` / `liquidity` / `volume` / `holder_count` / `smart_degen_count` / `renowned_count` / `bluechip_owner_percentage` / `rank` / `square_mentions` / `gas_fee` / `price` / `change` / `change1m` / `change5m` / `change1h` / `creation_timestamp` |
 | `--direction <asc\|desc>` | Sort direction (default `desc`) |
-| `--filter <tag...>` | Repeatable filter tags (chain-specific). **sol** (defaults: `renounced frozen`): `renounced` / `frozen` / `burn` / `token_burnt` / `has_social` / `not_social_dup` / `not_image_dup` / `dexscr_update_link` / `not_wash_trading` / `is_internal_market` / `is_out_market`. **evm** (defaults: `not_honeypot verified renounced`): `not_honeypot` / `verified` / `renounced` / `locked` / `token_burnt` / `has_social` / `not_social_dup` / `not_image_dup` / `dexscr_update_link` / `is_internal_market` / `is_out_market` |
-| `--platform <name...>` | Repeatable platform filter (chain-specific). **sol**: `Pump.fun` / `pump_mayhem` / `pump_mayhem_agent` / `pump_agent` / `letsbonk` / `bonkers` / `bags` / `memoo` / `liquid` / `bankr` / `zora` / `surge` / `anoncoin` / `moonshot_app` / `wendotdev` / `heaven` / `sugar` / `token_mill` / `believe` / `trendsfun` / `trends_fun` / `jup_studio` / `Moonshot` / `boop` / `xstocks` / `ray_launchpad` / `meteora_virtual_curve` / `pool_ray` / `pool_meteora` / `pool_pump_amm` / `pool_orca`. **bsc**: `fourmeme` / `fourmeme_agent` / `bn_fourmeme` / `flap` / `clanker` / `lunafun` / `pool_uniswap` / `pool_pancake`. **base**: `clanker` / `bankr` / `flaunch` / `zora` / `zora_creator` / `baseapp` / `basememe` / `virtuals_v2` / `klik` |
+| `--filter <tag...>` | Repeatable filter tags — see chain-specific lists below |
+| `--platform <name...>` | Repeatable platform filter — see chain-specific lists below |
+
+**Filter tags — sol** (defaults: `renounced frozen`):
+`not_risk` / `renounced` / `frozen` / `distributed` / `burn` / `token_burnt` / `has_social` / `not_social_dup` / `not_image_dup` / `dexscr_update_link` / `not_wash_trading` / `creator_hold` / `creator_close` / `creator_add_liquidity` / `creator_remove_liquidity` / `creator_sell` / `creator_buy` / `is_internal_market` / `is_out_market`
+
+**Filter tags — evm** (defaults: `not_honeypot verified renounced`):
+`not_risk` / `not_honeypot` / `verified` / `renounced` / `locked` / `distributed` / `token_burnt` / `has_social` / `not_social_dup` / `not_image_dup` / `dexscr_update_link` / `not_wash_trading` / `creator_hold` / `creator_close` / `creator_add_liquidity` / `creator_remove_liquidity` / `creator_sell` / `creator_buy` / `is_internal_market` / `is_out_market`
+
+**Platform filter — sol**: `Pump.fun` / `pump_mayhem` / `pump_mayhem_agent` / `pump_agent` / `letsbonk` / `bonkers` / `bags` / `memoo` / `liquid` / `bankr` / `zora` / `surge` / `anoncoin` / `moonshot_app` / `wendotdev` / `heaven` / `sugar` / `token_mill` / `believe` / `trendsfun` / `trends_fun` / `jup_studio` / `Moonshot` / `boop` / `xstocks` / `ray_launchpad` / `meteora_virtual_curve` / `pool_ray` / `pool_meteora` / `pool_pump_amm` / `pool_orca`
+
+**Platform filter — bsc**: `fourmeme` / `fourmeme_agent` / `bn_fourmeme` / `flap` / `clanker` / `lunafun` / `pool_uniswap` / `pool_pancake`
+
+**Platform filter — base**: `clanker` / `bankr` / `flaunch` / `zora` / `zora_creator` / `baseapp` / `basememe` / `virtuals_v2` / `klik`
 
 ## Usage Examples
 
@@ -75,6 +87,20 @@ gmgn-cli market kline \
 # Top 20 hot tokens on SOL in the last 1 hour, sorted by volume
 gmgn-cli market trending --chain sol --interval 1h --order-by volume --limit 20
 
+# Hot meme coins on SOL (Pump.fun), last 1 hour — safe filter + sorted by volume
+gmgn-cli market trending \
+  --chain sol --interval 1h \
+  --platform Pump.fun \
+  --filter not_risk --filter not_wash_trading \
+  --order-by volume --limit 20
+
+# Hot meme coins on SOL across all meme platforms, last 1 hour
+gmgn-cli market trending \
+  --chain sol --interval 1h \
+  --platform Pump.fun --platform letsbonk --platform moonshot_app \
+  --filter not_risk \
+  --order-by swaps --limit 50
+
 # Hot tokens with social links only, verified and not honeypot, on BSC over 24h
 gmgn-cli market trending \
   --chain bsc --interval 24h \
@@ -87,6 +113,33 @@ gmgn-cli market trending --chain sol --interval 6h --platform Pump.fun
 gmgn-cli market kline --chain sol --address <addr> \
   --resolution 5m --from <ts> --to <ts> --raw | jq '.[]'
 ```
+
+## Workflow: Get Hot Meme Coins
+
+To query the most trending meme coins on SOL (equivalent to https://gmgn.ai/trend?chain=sol&tab=trending), or on other chains by changing `--chain`:
+
+```bash
+# Step 1 — Get hot Pump.fun meme coins on SOL (last 1h, sorted by volume)
+gmgn-cli market trending \
+  --chain sol --interval 1h \
+  --platform Pump.fun \
+  --filter not_risk --filter not_wash_trading \
+  --order-by volume --limit 50 --raw
+
+# Step 2 — Get hot meme coins across all SOL meme platforms (last 1h)
+gmgn-cli market trending \
+  --chain sol --interval 1h \
+  --platform Pump.fun --platform letsbonk --platform moonshot_app \
+  --filter not_risk \
+  --order-by swaps --limit 50 --raw
+```
+
+Meme-coin specific signals to prioritize during analysis:
+- `change1h`, `change5m` — rapid price momentum is the core meme coin indicator
+- `smart_degen_count`, `renowned_count` — smart money / KOL participation
+- `swaps` — high transaction count = genuine trading activity
+- `liquidity` — must be sufficient to enter/exit without excessive slippage
+- `creation_timestamp` — newly launched tokens are higher-risk but offer bigger upside
 
 ## Workflow: Discover Trading Opportunities via Trending
 

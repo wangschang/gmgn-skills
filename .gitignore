@@ -16,5 +16,10 @@ dist
 # OS
 .DS_Store
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
 # Internal / testing (not for public release)
 testing/
